@@ -14,6 +14,11 @@ from transformers import AutoModel
 
 embeddings_params_initialized = False
 
+openai_proprietary_models = [
+    "text-embedding-3-small",
+    "text-embedding-3-large",
+    "text-embedding-ada-002",
+]
 
 def initialize_embedding_params():
     '''
@@ -98,6 +103,11 @@ def get_embeddings(input: list) -> np.ndarray:
 async def embeddings(input: list,
                      encoding_format: str,
                      model: str = None) -> dict:
+    # Many clients request proprietary OpenAI-models which we can never serve.
+    # Silently fall back to the default
+    if model in openai_proprietary_models:
+        model = None
+
     if model is None:
         model = st_model
     else:
